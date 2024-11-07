@@ -1,4 +1,4 @@
-package store.domain;
+package store.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,13 +9,13 @@ import java.util.List;
 
 public class FileLoader {
 
-    public static <T> List<T> fileReadLine(String fileName, LineParser<T> parser) throws IOException {
-        List<T> items = new ArrayList<>();
+    public static List<String> fileReadLine(String fileName) throws IOException {
+        List<String> items = new ArrayList<>();
         BufferedReader bufferedReader = loadFile(fileName);
         String line;
         while ((line = bufferedReader.readLine()) != null) {
             if (checkLine(line)) {
-                items.add(parser.parse(line));
+                items.add(line);
             }
         }
         return items;
@@ -31,10 +31,5 @@ public class FileLoader {
             throw new IllegalArgumentException("[ERROR] 파일이 존재하지 않습니다");
         }
         return new BufferedReader(new InputStreamReader(inputStream));
-    }
-
-    @FunctionalInterface
-    public interface LineParser<T> {
-        T parse(String line);
     }
 }
