@@ -34,8 +34,7 @@ public class OutputView {
             }
         }
     }
-
-
+    
     private void writeInitOnlyGeneralProducts(Storage storage) {
         for (GeneralProduct generalProduct : storage.getGeneralProducts()) {
             String generalProductName = generalProduct.getName();
