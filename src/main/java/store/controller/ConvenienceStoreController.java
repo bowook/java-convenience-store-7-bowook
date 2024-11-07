@@ -20,6 +20,11 @@ public class ConvenienceStoreController {
         outputView.writeWelcomeMessage();
         Storage storage = storageService.initializeStorage();
         outputView.writeInitStorageStatus(storage);
+        userPurchaseProduct();
+    }
+
+    private void userPurchaseProduct() {
+        String userPurchase = inputView.readItems();
     }
 
 

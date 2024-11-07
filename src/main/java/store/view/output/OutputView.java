@@ -52,6 +52,7 @@ public class OutputView {
             flag = findEqualPromotionProductName(storage.getPromotionProducts(), generalProductName, flag);
             writeOnlyGeneralProduct(flag, generalProduct);
         }
+        System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
     }
 
     private boolean findEqualPromotionProductName(List<PromotionProduct> promotionProducts, String name, boolean flag) {
@@ -69,4 +70,5 @@ public class OutputView {
             System.out.println(generalProduct.toString());
         }
     }
+
 }
