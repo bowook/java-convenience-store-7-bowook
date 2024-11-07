@@ -32,7 +32,7 @@ public class StorageService {
                 idx += 1;
                 continue;
             }
-            generalProducts.add(idx, new GeneralProduct(product.getName(), product.getPrice(), "재고 없음"));
+            generalProducts.add(idx, new GeneralProduct(product.getName(), product.getPrice(), "0"));
         }
         return generalProducts;
     }

@@ -25,4 +25,8 @@ public class PromotionProduct {
     public String getPrice() {
         return price;
     }
+
+    public int getQuantity() {
+        return Integer.parseInt(quantity);
+    }
 }
