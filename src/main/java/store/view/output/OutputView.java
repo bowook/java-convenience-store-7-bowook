@@ -4,6 +4,7 @@ import java.util.List;
 import store.domain.GeneralProduct;
 import store.domain.PromotionProduct;
 import store.domain.Storage;
+import store.exception.ConvenienceStoreException;
 
 public class OutputView {
 
@@ -57,6 +58,10 @@ public class OutputView {
         if (!flag) {
             System.out.println(generalProduct.toString());
         }
+    }
+
+    public void displayErrorMessage(ConvenienceStoreException convenienceStoreException) {
+        System.out.println(convenienceStoreException.getMessage());
     }
 
 }
