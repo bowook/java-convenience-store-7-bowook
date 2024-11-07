@@ -5,7 +5,7 @@ import camp.nextstep.edu.missionutils.Console;
 public class InputView {
 
     public String readItems() {
-        System.out.println(InputMessage.READ_ITEMS.getInputMessage());
+        System.out.println(InputMessage.READ_ITEMS_MESSAGE.getInputMessage());
         return readLine();
     }
 
