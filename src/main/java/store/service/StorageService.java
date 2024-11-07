@@ -11,9 +11,10 @@ import store.utils.FileLoader;
 public class StorageService {
     public Storage initializeStorage() {
         List<String> getFile = readFile();
-        List<GeneralProduct> onlyGeneralProducts = findGeneralProduct(getFile);
         List<PromotionProduct> onlyPromotionProducts = findPromotionProduct(getFile);
-        return new Storage(onlyGeneralProducts, onlyPromotionProducts);
+        List<GeneralProduct> onlyGeneralProducts = findGeneralProduct(getFile);
+        List<GeneralProduct> insertedGeneralProducts = insertOutOfStock(onlyPromotionProducts, onlyGeneralProducts);
+        return new Storage(insertedGeneralProducts, onlyPromotionProducts);
     }
 
     private List<String> readFile() {
@@ -22,6 +23,28 @@ public class StorageService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private List<GeneralProduct> insertOutOfStock(List<PromotionProduct> prItem, List<GeneralProduct> generalProducts) {
+        int idx = 0;
+        for (PromotionProduct product : prItem) {
+            if (findEqualGeneralProductName(generalProducts, product.getName())) {
+                idx += 1;
+                continue;
+            }
+            generalProducts.add(idx, new GeneralProduct(product.getName(), product.getPrice(), "재고 없음"));
+        }
+        return generalProducts;
+    }
+
+
+    private boolean findEqualGeneralProductName(List<GeneralProduct> generalProducts, String name) {
+        for (GeneralProduct generalProduct : generalProducts) {
+            if (generalProduct.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private List<GeneralProduct> findGeneralProduct(List<String> getFile) {

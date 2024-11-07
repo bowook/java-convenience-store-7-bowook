@@ -13,9 +13,12 @@ public class GeneralProduct {
 
     @Override
     public String toString() {
+        if ("재고 없음".equals(quantity)) {
+            return String.format("- %s %,d원 %s", name, Integer.parseInt(price), quantity);
+        }
         return String.format("- %s %,d원 %s개", name, Integer.parseInt(price), quantity);
     }
-
+    
     public String getName() {
         return name;
     }
