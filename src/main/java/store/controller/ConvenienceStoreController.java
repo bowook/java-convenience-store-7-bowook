@@ -1,6 +1,8 @@
 package store.controller;
 
+import java.util.List;
 import store.domain.Storage;
+import store.exception.ConvenienceStoreException;
 import store.service.StorageService;
 import store.view.input.InputView;
 import store.view.output.OutputView;
@@ -18,13 +20,23 @@ public class ConvenienceStoreController {
 
     public void operate() {
         outputView.writeWelcomeMessage();
+
         Storage storage = storageService.initializeStorage();
         outputView.writeInitStorageStatus(storage);
-        userPurchaseProduct();
+
+        userPurchaseProduct(storage);
     }
 
-    private void userPurchaseProduct() {
-        String userPurchase = inputView.readItems();
+    private void userPurchaseProduct(Storage storage) {
+        while (true) {
+            try {
+                List<String> purchaseProduct = inputView.readItems();
+                storage.validateStorageStatus(purchaseProduct);
+                break;
+            } catch (ConvenienceStoreException convenienceStoreException) {
+                outputView.displayErrorMessage(convenienceStoreException);
+            }
+        }
     }
 
 
