@@ -29,4 +29,8 @@ public class PromotionProduct {
     public int getQuantity() {
         return Integer.parseInt(quantity);
     }
+
+    public Promotion getPromotion() {
+        return promotion;
+    }
 }

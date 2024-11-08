@@ -14,6 +14,25 @@ public class InputView {
         return validatePurchaseItemProcess(splitByCommaPurchaseItem);
     }
 
+    public String readNoDiscountAnswer(String itemName, int itemQuantity) {
+        System.out.printf((InputMessage.NO_PROMOTION_DISCOUNT_MESSAGE.getInputMessage()) + "\n", itemName,
+                itemQuantity);
+        return validateUserAnswer(readLine());
+    }
+
+    public String readOneMoreFree(String itemName) {
+        System.out.printf((InputMessage.ONE_MORE_FREE_MESSAGE.getInputMessage()) + "\n", itemName);
+        return validateUserAnswer(readLine());
+    }
+
+    private String validateUserAnswer(String userAnswer) {
+        if (!userAnswer.equals("Y") && !userAnswer.equals("N")) {
+            throw ConvenienceStoreException.from(ErrorMessage.WRONG_ANSWER);
+        }
+        return userAnswer;
+    }
+
+
     private List<String> validatePurchaseItemProcess(List<String> splitByCommaPurchaseItem) {
         validateBracketsCount(splitByCommaPurchaseItem);
         List<String> deleteBracketItem = validateBracketsFormat(splitByCommaPurchaseItem);

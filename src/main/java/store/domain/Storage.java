@@ -14,13 +14,15 @@ public class Storage {
         this.promotionProducts = promotionProducts;
     }
 
-    public void validateStorageStatus(List<String> purchaseProduct) {
+    public List<String> validateStorageStatus(List<String> purchaseProduct) {
         for (String purchaseItem : purchaseProduct) {
             List<String> item = List.of(purchaseItem.split("-"));
             validateItemName(item.get(0));
             validateQuantity(item.get(0), item.get(1));
         }
+        return purchaseProduct;
     }
+
 
     public List<GeneralProduct> getGeneralProducts() {
         return Collections.unmodifiableList(generalProducts);
@@ -30,34 +32,29 @@ public class Storage {
         return Collections.unmodifiableList(promotionProducts);
     }
 
+
     private void validateQuantity(String name, String quantity) {
-        int count = 0;
-        if (isPromotionProductInStorage(name)) {
-            count += getPromotionProductQuantity(name);
-        }
-        count += getGeneralProductQuantity(name);
-        if (count < Integer.parseInt(quantity)) {
+        if (getProductQuantity(name) < Integer.parseInt(quantity)) {
             throw ConvenienceStoreException.from(ErrorMessage.STORAGE_OVER);
         }
     }
 
-    private int getGeneralProductQuantity(String name) {
-        for (GeneralProduct generalProduct : generalProducts) {
-            if (generalProduct.getName().equals(name)) {
-                return generalProduct.getQuantity();
-            }
+    private int getProductQuantity(String name) {
+        PromotionProduct promotionProduct = findPromotionProduct(name);
+        int count = 0;
+        if (promotionProduct != null) {
+            count += promotionProduct.getQuantity();
         }
-        return 0;
+        return count + findGeneralProduct(name).getQuantity();
     }
 
-    private int getPromotionProductQuantity(String name) {
-        for (PromotionProduct promotionProduct : promotionProducts) {
-            if (promotionProduct.getName().equals(name)) {
-                return promotionProduct.getQuantity();
-            }
-        }
-        return 0;
+    public GeneralProduct findGeneralProduct(String productName) {
+        return generalProducts.stream()
+                .filter(product -> product.getName().equals(productName))
+                .findFirst()
+                .orElse(null);
     }
+
 
     private void validateItemName(String name) {
         if (!isProductInStorage(name)) {
@@ -65,11 +62,16 @@ public class Storage {
         }
     }
 
-    private boolean isPromotionProductInStorage(String productName) {
-        return promotionProducts.stream().anyMatch(product -> product.getName().equals(productName));
+    public PromotionProduct findPromotionProduct(String productName) {
+        return promotionProducts.stream()
+                .filter(product -> product.getName().equals(productName))
+                .findFirst()
+                .orElse(null);
     }
+
 
     private boolean isProductInStorage(String productName) {
         return generalProducts.stream().anyMatch(product -> product.getName().equals(productName));
     }
+
 }
