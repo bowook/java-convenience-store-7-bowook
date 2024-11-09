@@ -29,6 +29,17 @@ public class ConvenienceStoreController {
         outputView.writeInitStorageStatus(storage);
         List<String> userProduct = userPurchaseProduct();
         processPurchase(userProduct);
+        String userMembershipAnswer = userMembership();
+    }
+
+    private String userMembership() {
+        while (true) {
+            try {
+                return inputView.readMembership();
+            } catch (ConvenienceStoreException convenienceStoreException) {
+                outputView.displayErrorMessage(convenienceStoreException);
+            }
+        }
     }
 
     private List<String> userPurchaseProduct() {
@@ -45,7 +56,13 @@ public class ConvenienceStoreController {
         for (String product : purchaseProduct) {
             List<String> item = List.of(product.split("-"));
             checkIsPromotionProduct(item.get(0), Integer.parseInt(item.get(1)));
+            purchaseGeneralProduct(item.get(0), Integer.parseInt(item.get(1)));
         }
+    }
+
+    private void purchaseGeneralProduct(String itemName, int itemQuantity) {
+        GeneralProduct generalProduct = storage.findGeneralProduct(itemName);
+        storage.subtractGeneralProduct(generalProduct, itemQuantity);
     }
 
     private void checkIsPromotionProduct(String itemName, int itemQuantity) {
@@ -56,6 +73,8 @@ public class ConvenienceStoreController {
             boolean freeTag = userOneMoreFree(remainPurchase, remainPromotionStock, promotionProduct, itemQuantity);
             boolean supplementTag = supplementStock(itemQuantity, remainPromotionStock, promotionProduct);
             availablePromoStock(freeTag, supplementTag, promotionProduct, itemQuantity);
+            System.out.println(promotionProduct.getQuantity());
+            System.out.println(storage.findGeneralProduct(itemName).getQuantity());
         }
     }
 
@@ -63,7 +82,7 @@ public class ConvenienceStoreController {
         if (Compare.checkSupplementStock(remainStock)) {
             int noPromotion = Calculator.calculateNoPromotion(promotionProduct);
             storage.subtractPromotionProduct(promotionProduct, noPromotion);
-            String userAnswer = checkUserNoPromotion(promotionProduct);
+            String userAnswer = checkUserNoPromotion(promotionProduct, itemQuantity - noPromotion);
             suppleGeneralProduct(promotionProduct, userAnswer, itemQuantity - noPromotion);
             return true;
         }
@@ -76,30 +95,14 @@ public class ConvenienceStoreController {
         if (answer.equals("Y")) {
             storage.subtractGeneralProduct(generalProduct, itemQuantity - beforeQuantity);
             storage.subtractPromotionProduct(promotionProduct, beforeQuantity);
-            return;
         }
-        suppleUserAnswerNo(promotionProduct, generalProduct, itemQuantity, beforeQuantity);
-    }
-
-    private void suppleUserAnswerNo(PromotionProduct pmItem, GeneralProduct grItem, int quantity, int prevQuantity) {
-        int storageStatus = pmItem.getQuantity() - (quantity - prevQuantity);
-        if (storageStatus <= 0) {
-            storage.subtractPromotionProduct(pmItem, storageStatus + Math.abs(quantity - prevQuantity));
-            storage.subtractGeneralProduct(grItem, Math.abs(storageStatus));
-            return;
-        }
-        suppleNoNeedGeneralStorage(pmItem, storageStatus);
-    }
-
-    private void suppleNoNeedGeneralStorage(PromotionProduct pmItem, int storageStatus) {
-        storage.subtractPromotionProduct(pmItem, storageStatus);
     }
 
 
-    private String checkUserNoPromotion(PromotionProduct promotionProduct) {
+    private String checkUserNoPromotion(PromotionProduct promotionProduct, int quantity) {
         while (true) {
             try {
-                return inputView.readNoDiscountAnswer(promotionProduct.getName(), promotionProduct.getQuantity());
+                return inputView.readNoDiscountAnswer(promotionProduct.getName(), quantity);
             } catch (ConvenienceStoreException convenienceStoreException) {
                 outputView.displayErrorMessage(convenienceStoreException);
             }
