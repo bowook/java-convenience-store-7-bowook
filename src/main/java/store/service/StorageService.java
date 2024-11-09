@@ -53,7 +53,7 @@ public class StorageService {
                 idx += 1;
                 continue;
             }
-            generalProducts.add(idx, new GeneralProduct(product.getName(), product.getPrice(), "0"));
+            generalProducts.add(idx, new GeneralProduct(product.getName(), product.getPrice(), 0));
         }
         return generalProducts;
     }
@@ -73,7 +73,7 @@ public class StorageService {
         for (String itemDetails : getFile) {
             if (itemDetails.contains("null")) {
                 List<String> item = List.of(itemDetails.split(","));
-                onlyGeneralProducts.add(new GeneralProduct(item.get(0), item.get(1), item.get(2)));
+                onlyGeneralProducts.add(new GeneralProduct(item.get(0), item.get(1), Integer.parseInt(item.get(2))));
             }
         }
         return onlyGeneralProducts;
@@ -84,7 +84,7 @@ public class StorageService {
         for (String itemDetails : getFile) {
             if (itemDetails.contains("탄산2+1") || itemDetails.contains("MD추천상품") || itemDetails.contains("반짝할인")) {
                 List<String> item = List.of(itemDetails.split(","));
-                onlyPromotionProducts.add(new PromotionProduct(item.get(0), item.get(1), item.get(2),
+                onlyPromotionProducts.add(new PromotionProduct(item.get(0), item.get(1), Integer.parseInt(item.get(2)),
                         matchingPromotion(item.get(3), promotions)));
             }
         }
