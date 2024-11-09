@@ -6,6 +6,8 @@ import store.domain.PromotionProduct;
 import store.domain.Storage;
 import store.exception.ConvenienceStoreException;
 import store.service.StorageService;
+import store.utils.Calculator;
+import store.utils.Compare;
 import store.view.input.InputView;
 import store.view.output.OutputView;
 
@@ -13,6 +15,7 @@ public class ConvenienceStoreController {
     private final InputView inputView;
     private final OutputView outputView;
     private final StorageService storageService;
+    private Storage storage;
 
     public ConvenienceStoreController(InputView inputView, OutputView outputView, StorageService storageService) {
         this.inputView = inputView;
@@ -22,13 +25,13 @@ public class ConvenienceStoreController {
 
     public void operate() {
         outputView.writeWelcomeMessage();
-        Storage storage = storageService.initializeStorage();
+        this.storage = storageService.initializeStorage();
         outputView.writeInitStorageStatus(storage);
-        List<String> userProduct = userPurchaseProduct(storage);
-        processPurchase(storage, userProduct);
+        List<String> userProduct = userPurchaseProduct();
+        processPurchase(userProduct);
     }
 
-    private List<String> userPurchaseProduct(Storage storage) {
+    private List<String> userPurchaseProduct() {
         while (true) {
             try {
                 return storage.validateStorageStatus(inputView.readItems());
@@ -38,68 +41,86 @@ public class ConvenienceStoreController {
         }
     }
 
-    private void processPurchase(Storage storage, List<String> purchaseProduct) {
-        //프로모션 상품인지 확인을 하고
-        //프로모션 상품이면 프로모션 상품 재고 안에서 구매할 수 있는지 확인을 하고
-        //프로모션 재고 안에서 구매할 수 있으면 그 만큼 재고 차감
-        //프로며선 재고 안에서 구매할 수 있는데 2+1인데 2개만 가져온 경우 1개 무료 증정 추가할거냐고 물어보고
-        //사용자가 Y라고 답변하면 1개 추가로 증정해서 총 재고 3개 차감
-        //사용자가 N라고 답변하면 추가 증정 없이 총 재고 2개 차감
-        //프로모션 재고 안에서 구매할 수 없으면 일반 재고로 가서 남은 만큼 개수를 가져오고 구매할거냐고 물어보고
-        //구매 안한다고 하면 남은 개수는 판매 안하고 프로모션 재고만 판매
+    private void processPurchase(List<String> purchaseProduct) {
         for (String product : purchaseProduct) {
             List<String> item = List.of(product.split("-"));
-            String itemName = item.get(0);
-            int itemQuantity = Integer.parseInt(item.get(1));
-            checkIsPromotionProduct(storage, itemName, itemQuantity);
+            checkIsPromotionProduct(item.get(0), Integer.parseInt(item.get(1)));
         }
     }
 
-    private void checkIsPromotionProduct(Storage storage, String itemName, int itemQuantity) {
+    private void checkIsPromotionProduct(String itemName, int itemQuantity) {
         PromotionProduct promotionProduct = storage.findPromotionProduct(itemName);
         if (promotionProduct != null) {
-            int sum = promotionProduct.getPromotion().getBuy() + promotionProduct.getPromotion().getGet();
-            int remainStock = promotionProduct.getQuantity() - (sum * (itemQuantity / sum));
-            int remainProduct = itemQuantity % sum;
-            //1. 한개 더 가져올거냐고 물어봐야됨
-            if ((remainProduct == promotionProduct.getPromotion().getBuy() && remainStock >= sum)
-                    && itemQuantity % sum == promotionProduct.getPromotion().getBuy()) {
-                String userAnswer = checkUserAnswer(promotionProduct);
-                if (userAnswer.equals("Y")) {
-                    remainStock -= sum;
-                } else if (userAnswer.equals("N")) {
-                    remainStock -= remainProduct;
-                }
-            }
-            //2. 그냥 프로모션에서 다 구매 가능한 경우
-            if (remainProduct == remainStock) {
-                remainStock -= remainProduct;
-            }
-            //프로모션 재고 안에서 다 구매를 못하는 상황
-            //프로모션 재고 없음 만들고, 나머지가 있어서 일반재고도 건들어야 하는 상황
-            GeneralProduct generalProduct = storage.findGeneralProduct(itemName);
-            if (remainStock < 0) {
-                String userAnswer = checkUserNoPromotion(promotionProduct.getName(),
-                        promotionProduct.getQuantity() % sum);
-                if (userAnswer.equals("Y")) {
-                    int generalProductQuantity =
-                            generalProduct.getQuantity() - (itemQuantity - (promotionProduct.getQuantity() / sum) * sum)
-                                    + (promotionProduct.getQuantity() % sum);
-                    System.out.println(generalProductQuantity);
-                }
-                remainStock = 0;
-            }
+            int remainPromotionStock = Calculator.calculateRemainStock(promotionProduct, itemQuantity);
+            int remainPurchase = Calculator.calculateUserRemain(promotionProduct, itemQuantity);
+            boolean freeTag = userOneMoreFree(remainPurchase, remainPromotionStock, promotionProduct, itemQuantity);
+            boolean supplementTag = supplementStock(itemQuantity, remainPromotionStock, promotionProduct);
+            availablePromoStock(freeTag, supplementTag, promotionProduct, itemQuantity);
         }
     }
 
-    private String checkUserNoPromotion(String name, int quantity) {
+    private boolean supplementStock(int itemQuantity, int remainStock, PromotionProduct promotionProduct) {
+        if (Compare.checkSupplementStock(remainStock)) {
+            int noPromotion = Calculator.calculateNoPromotion(promotionProduct);
+            storage.subtractPromotionProduct(promotionProduct, noPromotion);
+            String userAnswer = checkUserNoPromotion(promotionProduct);
+            suppleGeneralProduct(promotionProduct, userAnswer, itemQuantity - noPromotion);
+            return true;
+        }
+        return false;
+    }
+
+    private void suppleGeneralProduct(PromotionProduct promotionProduct, String answer, int itemQuantity) {
+        GeneralProduct generalProduct = storage.findGeneralProduct(promotionProduct.getName());
+        int beforeQuantity = promotionProduct.getQuantity();
+        if (answer.equals("Y")) {
+            storage.subtractGeneralProduct(generalProduct, itemQuantity - beforeQuantity);
+            storage.subtractPromotionProduct(promotionProduct, beforeQuantity);
+            return;
+        }
+        suppleUserAnswerNo(promotionProduct, generalProduct, itemQuantity, beforeQuantity);
+    }
+
+    private void suppleUserAnswerNo(PromotionProduct pmItem, GeneralProduct grItem, int quantity, int prevQuantity) {
+        int storageStatus = pmItem.getQuantity() - (quantity - prevQuantity);
+        if (storageStatus <= 0) {
+            storage.subtractPromotionProduct(pmItem, storageStatus + Math.abs(quantity - prevQuantity));
+            storage.subtractGeneralProduct(grItem, Math.abs(storageStatus));
+            return;
+        }
+        suppleNoNeedGeneralStorage(pmItem, storageStatus);
+    }
+
+    private void suppleNoNeedGeneralStorage(PromotionProduct pmItem, int storageStatus) {
+        storage.subtractPromotionProduct(pmItem, storageStatus);
+    }
+
+
+    private String checkUserNoPromotion(PromotionProduct promotionProduct) {
         while (true) {
             try {
-                return inputView.readNoDiscountAnswer(name, quantity);
+                return inputView.readNoDiscountAnswer(promotionProduct.getName(), promotionProduct.getQuantity());
             } catch (ConvenienceStoreException convenienceStoreException) {
                 outputView.displayErrorMessage(convenienceStoreException);
             }
         }
+    }
+
+    private void availablePromoStock(boolean free, boolean suppleTag, PromotionProduct promotionProduct, int quantity) {
+        if (!free && !suppleTag) {
+            storage.subtractPromotionProduct(promotionProduct, quantity);
+        }
+    }
+
+    private boolean userOneMoreFree(int remainBuy, int remainStock, PromotionProduct product, int quantity) {
+        if (Compare.checkFreeOneMore(remainBuy, remainStock, product)) {
+            storage.subtractPromotionProduct(product, quantity);
+            if (checkUserAnswer(product).equals("Y")) {
+                storage.subtractPromotionProduct(product, product.getPromotion().getGet());
+            }
+            return true;
+        }
+        return false;
     }
 
     private String checkUserAnswer(PromotionProduct promotionProduct) {
@@ -111,6 +132,5 @@ public class ConvenienceStoreController {
             }
         }
     }
-
 
 }
