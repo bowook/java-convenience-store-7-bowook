@@ -33,6 +33,12 @@ public class InputView {
         return validateUserAnswer(readLine());
     }
 
+    public String readRetry() {
+        System.out.println();
+        System.out.println(InputMessage.RETRY_MESSAGE.getInputMessage());
+        return validateUserAnswer(readLine());
+    }
+
     private String validateUserAnswer(String userAnswer) {
         if (!userAnswer.equals("Y") && !userAnswer.equals("N")) {
             throw ConvenienceStoreException.from(ErrorMessage.WRONG_ANSWER);
