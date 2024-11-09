@@ -1,6 +1,7 @@
 package store.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Promotion {
     private final String name;
@@ -28,5 +29,13 @@ public class Promotion {
     public int getGet() {
         return get;
     }
+
+    public boolean isActive(LocalDateTime dateTime) {
+        LocalDate date = dateTime.toLocalDate(); // LocalDate로 변환하여 비교
+        return (date.isEqual(startDate) || date.isAfter(startDate)) &&
+                (date.isEqual(endDate) || date.isBefore(endDate));
+    }
+
+
 }
 
