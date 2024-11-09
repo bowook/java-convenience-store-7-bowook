@@ -15,13 +15,21 @@ public class InputView {
     }
 
     public String readNoDiscountAnswer(String itemName, int itemQuantity) {
+        System.out.println();
         System.out.printf((InputMessage.NO_PROMOTION_DISCOUNT_MESSAGE.getInputMessage()) + "\n", itemName,
                 itemQuantity);
         return validateUserAnswer(readLine());
     }
 
     public String readOneMoreFree(String itemName) {
+        System.out.println();
         System.out.printf((InputMessage.ONE_MORE_FREE_MESSAGE.getInputMessage()) + "\n", itemName);
+        return validateUserAnswer(readLine());
+    }
+
+    public String readMembership() {
+        System.out.println();
+        System.out.println(InputMessage.MEMBERSHIP_MESSAGE.getInputMessage());
         return validateUserAnswer(readLine());
     }
 
