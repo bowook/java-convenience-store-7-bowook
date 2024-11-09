@@ -1,5 +1,6 @@
 package store.utils;
 
+import java.util.List;
 import store.domain.PromotionProduct;
 
 public class Calculator {
@@ -17,5 +18,18 @@ public class Calculator {
         return promotionProduct.getPromotionSum() * (promotionProduct.getQuantity()
                 / promotionProduct.getPromotionSum());
     }
+
+    public static List<Integer> calculateGetAndBuy(int count, int leftBuy, PromotionProduct product) {
+        int get = (count - leftBuy) / product.getPromotionSum();
+        int buy = (count - leftBuy) - get;
+        return List.of(buy, get);
+    }
+
+    public static List<Integer> calculateOneMore(int count, int leftBuy, PromotionProduct product) {
+        int get = (count - leftBuy) / product.getPromotionSum();
+        int buy = (count - leftBuy) - get + product.getPromotionGetBuy();
+        return List.of(buy, get);
+    }
+
 
 }
