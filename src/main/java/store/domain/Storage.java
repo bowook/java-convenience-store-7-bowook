@@ -74,4 +74,12 @@ public class Storage {
         return generalProducts.stream().anyMatch(product -> product.getName().equals(productName));
     }
 
+    public void subtractPromotionProduct(PromotionProduct promotionProduct, int itemQuantity) {
+        promotionProduct.subtraction(itemQuantity);
+    }
+
+    public void subtractGeneralProduct(GeneralProduct generalProduct, int itemQuantity) {
+        generalProduct.subtraction(itemQuantity);
+    }
+
 }
