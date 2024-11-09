@@ -1,8 +1,11 @@
 package store.controller;
 
+import camp.nextstep.edu.missionutils.DateTimes;
 import java.util.List;
 import store.domain.GeneralProduct;
 import store.domain.PromotionProduct;
+import store.domain.Receipt;
+import store.domain.ReceiptItem;
 import store.domain.Storage;
 import store.exception.ConvenienceStoreException;
 import store.service.StorageService;
@@ -14,22 +17,34 @@ import store.view.output.OutputView;
 public class ConvenienceStoreController {
     private final InputView inputView;
     private final OutputView outputView;
-    private final StorageService storageService;
-    private Storage storage;
+    private final Storage storage;
 
     public ConvenienceStoreController(InputView inputView, OutputView outputView, StorageService storageService) {
         this.inputView = inputView;
         this.outputView = outputView;
-        this.storageService = storageService;
+        this.storage = storageService.initializeStorage();
     }
 
     public void operate() {
-        outputView.writeWelcomeMessage();
-        this.storage = storageService.initializeStorage();
-        outputView.writeInitStorageStatus(storage);
-        List<String> userProduct = userPurchaseProduct();
-        processPurchase(userProduct);
-        String userMembershipAnswer = userMembership();
+        String retryFlag;
+        do {
+            outputView.writeWelcomeMessage();
+            outputView.writeStorageStatus(storage);
+            Receipt receipt = new Receipt();
+            processPurchase(userPurchaseProduct(), receipt);
+            outputView.writeReceipt(receipt, userMembership());
+            retryFlag = userRetry();
+        } while (retryFlag.equalsIgnoreCase("Y"));
+    }
+
+    private String userRetry() {
+        while (true) {
+            try {
+                return inputView.readRetry();
+            } catch (ConvenienceStoreException convenienceStoreException) {
+                outputView.displayErrorMessage(convenienceStoreException);
+            }
+        }
     }
 
     private String userMembership() {
@@ -52,50 +67,54 @@ public class ConvenienceStoreController {
         }
     }
 
-    private void processPurchase(List<String> purchaseProduct) {
+    private void processPurchase(List<String> purchaseProduct, Receipt receipt) {
         for (String product : purchaseProduct) {
             List<String> item = List.of(product.split("-"));
-            checkIsPromotionProduct(item.get(0), Integer.parseInt(item.get(1)));
-            purchaseGeneralProduct(item.get(0), Integer.parseInt(item.get(1)));
+            PromotionProduct promotionProduct = storage.findPromotionProduct(item.get(0));
+            if (promotionProduct != null && promotionProduct.getPromotion().isActive(DateTimes.now())) {
+                checkIsPromotionProduct(promotionProduct, Integer.parseInt(item.get(1)), receipt);
+                continue;
+            }
+            purchaseGeneralProduct(item.get(0), Integer.parseInt(item.get(1)), receipt);
         }
     }
 
-    private void purchaseGeneralProduct(String itemName, int itemQuantity) {
+    private void purchaseGeneralProduct(String itemName, int itemQuantity, Receipt receipt) {
         GeneralProduct generalProduct = storage.findGeneralProduct(itemName);
         storage.subtractGeneralProduct(generalProduct, itemQuantity);
+        receipt.addItem(new ReceiptItem(itemName, itemQuantity, 0, Integer.parseInt(generalProduct.getPrice())));
     }
 
-    private void checkIsPromotionProduct(String itemName, int itemQuantity) {
-        PromotionProduct promotionProduct = storage.findPromotionProduct(itemName);
-        if (promotionProduct != null) {
-            int remainPromotionStock = Calculator.calculateRemainStock(promotionProduct, itemQuantity);
-            int remainPurchase = Calculator.calculateUserRemain(promotionProduct, itemQuantity);
-            boolean freeTag = userOneMoreFree(remainPurchase, remainPromotionStock, promotionProduct, itemQuantity);
-            boolean supplementTag = supplementStock(itemQuantity, remainPromotionStock, promotionProduct);
-            availablePromoStock(freeTag, supplementTag, promotionProduct, itemQuantity);
-            System.out.println(promotionProduct.getQuantity());
-            System.out.println(storage.findGeneralProduct(itemName).getQuantity());
-        }
+    private void checkIsPromotionProduct(PromotionProduct promotionProduct, int itemQuantity, Receipt receipt) {
+        int stock = Calculator.calculateRemainStock(promotionProduct, itemQuantity);
+        int purchase = Calculator.calculateUserRemain(promotionProduct, itemQuantity);
+        boolean freeTag = userOneMoreFree(purchase, stock, promotionProduct, itemQuantity, receipt);
+        boolean supplementTag = supplementStock(itemQuantity, stock, promotionProduct, receipt);
+        useStock(freeTag, supplementTag, promotionProduct, itemQuantity, receipt);
     }
 
-    private boolean supplementStock(int itemQuantity, int remainStock, PromotionProduct promotionProduct) {
-        if (Compare.checkSupplementStock(remainStock)) {
-            int noPromotion = Calculator.calculateNoPromotion(promotionProduct);
-            storage.subtractPromotionProduct(promotionProduct, noPromotion);
-            String userAnswer = checkUserNoPromotion(promotionProduct, itemQuantity - noPromotion);
-            suppleGeneralProduct(promotionProduct, userAnswer, itemQuantity - noPromotion);
-            return true;
+    private boolean supplementStock(int quantity, int stock, PromotionProduct product, Receipt receipt) {
+        if (Compare.checkSupplementStock(stock)) {
+            int noPromotion = Calculator.calculateNoPromotion(product);
+            int beforePromotionQuantity = product.getQuantity();
+            storage.subtractPromotionProduct(product, noPromotion);
+            String userAnswer = checkUserNoPromotion(product, quantity - noPromotion);
+            return suppleGeneralProduct(product, userAnswer, quantity - noPromotion, receipt,
+                    beforePromotionQuantity);
         }
         return false;
     }
 
-    private void suppleGeneralProduct(PromotionProduct promotionProduct, String answer, int itemQuantity) {
-        GeneralProduct generalProduct = storage.findGeneralProduct(promotionProduct.getName());
-        int beforeQuantity = promotionProduct.getQuantity();
+    private boolean suppleGeneralProduct(PromotionProduct product, String answer, int quantity, Receipt receipt,
+                                         int prevQuantity) {
+        GeneralProduct generalProduct = storage.findGeneralProduct(product.getName());
+        int currentQuantity = product.getQuantity();
         if (answer.equals("Y")) {
-            storage.subtractGeneralProduct(generalProduct, itemQuantity - beforeQuantity);
-            storage.subtractPromotionProduct(promotionProduct, beforeQuantity);
+            storage.subtractGeneralProduct(generalProduct, quantity - currentQuantity);
+            storage.subtractPromotionProduct(product, currentQuantity);
+            return noDiscountPurchase(receipt, quantity, prevQuantity, currentQuantity, product);
         }
+        return noOneMoreReceipt(receipt, prevQuantity, currentQuantity, product);
     }
 
 
@@ -109,21 +128,52 @@ public class ConvenienceStoreController {
         }
     }
 
-    private void availablePromoStock(boolean free, boolean suppleTag, PromotionProduct promotionProduct, int quantity) {
-        if (!free && !suppleTag) {
-            storage.subtractPromotionProduct(promotionProduct, quantity);
+    private void useStock(boolean freeTag, boolean suppleTag, PromotionProduct product, int quantity, Receipt receipt) {
+        if (!freeTag && !suppleTag) {
+            storage.subtractPromotionProduct(product, quantity);
+            int free = quantity / product.getPromotionSum();
+            receipt.addItem(
+                    new ReceiptItem(product.getName(), quantity - free, free, Integer.parseInt(product.getPrice())));
         }
     }
 
-    private boolean userOneMoreFree(int remainBuy, int remainStock, PromotionProduct product, int quantity) {
-        if (Compare.checkFreeOneMore(remainBuy, remainStock, product)) {
-            storage.subtractPromotionProduct(product, quantity);
+    private boolean userOneMoreFree(int leftBuy, int leftStock, PromotionProduct product, int count, Receipt receipt) {
+        if (Compare.checkFreeOneMore(leftBuy, leftStock, product)) {
+            storage.subtractPromotionProduct(product, count);
             if (checkUserAnswer(product).equals("Y")) {
-                storage.subtractPromotionProduct(product, product.getPromotion().getGet());
+                storage.subtractPromotionProduct(product, product.getPromotionGetGet());
+                return oneMoreReceipt(receipt, count, leftBuy, product);
             }
-            return true;
+            return noOneMoreReceipt(receipt, count, leftBuy, product);
         }
         return false;
+    }
+
+    private boolean noDiscountPurchase(Receipt receipt, int quantity, int count, int leftBuy, PromotionProduct item) {
+        List<Integer> getBuySet = Calculator.calculateGetAndBuy(count, leftBuy, item);
+        String productName = item.getName();
+        int buy = getBuySet.get(0) + quantity;
+        int get = getBuySet.get(1);
+        receipt.addItem(new ReceiptItem(productName, buy, get, Integer.parseInt(item.getPrice())));
+        return true;
+    }
+
+    private boolean noOneMoreReceipt(Receipt receipt, int count, int leftBuy, PromotionProduct product) {
+        List<Integer> getBuySet = Calculator.calculateOneMore(count, leftBuy, product);
+        String productName = product.getName();
+        int buy = getBuySet.get(0);
+        int get = getBuySet.get(1);
+        receipt.addItem(new ReceiptItem(productName, buy, get, Integer.parseInt(product.getPrice())));
+        return true;
+    }
+
+    private boolean oneMoreReceipt(Receipt receipt, int count, int leftBuy, PromotionProduct product) {
+        List<Integer> getBuySet = Calculator.calculateOneMore(count, leftBuy, product);
+        String productName = product.getName();
+        int buy = getBuySet.get(0);
+        int get = getBuySet.get(1) + 1;
+        receipt.addItem(new ReceiptItem(productName, buy, get, Integer.parseInt(product.getPrice())));
+        return true;
     }
 
     private String checkUserAnswer(PromotionProduct promotionProduct) {
