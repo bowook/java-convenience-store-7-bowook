@@ -27,6 +27,10 @@ public class GeneralProduct {
         return quantity;
     }
 
+    public String getPrice() {
+        return price;
+    }
+
     public void subtraction(int value) {
         this.quantity -= Math.abs(value);
     }

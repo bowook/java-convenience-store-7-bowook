@@ -15,6 +15,9 @@ public class PromotionProduct {
 
     @Override
     public String toString() {
+        if (quantity == 0) {
+            return String.format("- %s %,d원 재고 없음 %s", name, Integer.parseInt(price), promotion.getName());
+        }
         return String.format("- %s %,d원 %s개 %s", name, Integer.parseInt(price), quantity, promotion.getName());
     }
 
@@ -40,6 +43,10 @@ public class PromotionProduct {
 
     public int getPromotionGetBuy() {
         return promotion.getBuy();
+    }
+
+    public int getPromotionGetGet() {
+        return promotion.getGet();
     }
 
     public void subtraction(int value) {
