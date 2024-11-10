@@ -3,6 +3,8 @@ package store.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import store.constant.FileMessage;
+import store.constant.SignMessage;
 import store.domain.GeneralProduct;
 import store.domain.Promotion;
 import store.domain.PromotionProduct;
@@ -22,7 +24,7 @@ public class StorageService {
 
     private List<String> loadPromotions() {
         try {
-            return FileLoader.fileReadLine("promotions.md");
+            return FileLoader.fileReadLine(FileMessage.PROMOTION_FILE_NAME.getFileMessage());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -31,7 +33,7 @@ public class StorageService {
     private List<Promotion> generatePromotionData(List<String> promotionFile) {
         List<Promotion> promotions = new ArrayList<>();
         for (String line : promotionFile) {
-            List<String> items = List.of(line.split(","));
+            List<String> items = List.of(line.split(SignMessage.COMMA.getSign()));
             promotions.add(new Promotion(items.get(0), Integer.parseInt(items.get(1)), Integer.parseInt(items.get(2)),
                     items.get(3), items.get(4)));
         }
@@ -40,7 +42,7 @@ public class StorageService {
 
     private List<String> loadProducts() {
         try {
-            return FileLoader.fileReadLine("products.md");
+            return FileLoader.fileReadLine(FileMessage.PRODUCTS_FILE_NAME.getFileMessage());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -71,8 +73,8 @@ public class StorageService {
     private List<GeneralProduct> findGeneralProduct(List<String> getFile) {
         List<GeneralProduct> onlyGeneralProducts = new ArrayList<>();
         for (String itemDetails : getFile) {
-            if (itemDetails.contains("null")) {
-                List<String> item = List.of(itemDetails.split(","));
+            if (itemDetails.contains(FileMessage.NULL.getFileMessage())) {
+                List<String> item = List.of(itemDetails.split(SignMessage.COMMA.getSign()));
                 onlyGeneralProducts.add(new GeneralProduct(item.get(0), item.get(1), Integer.parseInt(item.get(2))));
             }
         }
@@ -82,13 +84,27 @@ public class StorageService {
     private List<PromotionProduct> findPromotionProduct(List<String> getFile, List<Promotion> promotions) {
         List<PromotionProduct> onlyPromotionProducts = new ArrayList<>();
         for (String itemDetails : getFile) {
-            if (itemDetails.contains("탄산2+1") || itemDetails.contains("MD추천상품") || itemDetails.contains("반짝할인")) {
-                List<String> item = List.of(itemDetails.split(","));
-                onlyPromotionProducts.add(new PromotionProduct(item.get(0), item.get(1), Integer.parseInt(item.get(2)),
-                        matchingPromotion(item.get(3), promotions)));
+            if (isPromotionProduct(itemDetails)) {
+                addPromotionProduct(onlyPromotionProducts, itemDetails, promotions);
             }
         }
         return onlyPromotionProducts;
+    }
+
+    private boolean isPromotionProduct(String itemDetails) {
+        return itemDetails.contains(FileMessage.SOFT_DRINK.getFileMessage())
+                || itemDetails.contains(FileMessage.MD_RECOMMEND_PRODUCT.getFileMessage())
+                || itemDetails.contains(FileMessage.FLASH_DISCOUNT.getFileMessage());
+    }
+
+    private void addPromotionProduct(List<PromotionProduct> products, String itemDetails, List<Promotion> promotions) {
+        List<String> item = List.of(itemDetails.split(SignMessage.COMMA.getSign()));
+        String productName = item.get(0);
+        String productCategory = item.get(1);
+        int price = Integer.parseInt(item.get(2));
+        Promotion promotion = matchingPromotion(item.get(3), promotions);
+
+        products.add(new PromotionProduct(productName, productCategory, price, promotion));
     }
 
     private Promotion matchingPromotion(String promotionName, List<Promotion> promotions) {
