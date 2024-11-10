@@ -24,4 +24,5 @@ public enum OutputMessage {
     public String getOutputMessage() {
         return outputMessage;
     }
+
 }

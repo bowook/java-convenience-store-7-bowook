@@ -3,7 +3,8 @@ package store.constant;
 public enum CommonValue {
     ZERO(0),
     ONE(1),
-    TWO(2);
+    TWO(2),
+    EIGHT_THOUSAND(8000);
 
     private final int value;
 
@@ -14,4 +15,5 @@ public enum CommonValue {
     public int getValue() {
         return value;
     }
+
 }

@@ -16,4 +16,5 @@ public enum InputMessage {
     public String getInputMessage() {
         return inputMessage;
     }
+
 }

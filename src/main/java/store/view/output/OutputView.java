@@ -10,11 +10,9 @@ import store.exception.ConvenienceStoreException;
 
 public class OutputView {
 
-    public void writeWelcomeMessage() {
-        System.out.println(OutputMessage.WELCOME_MESSAGE.getOutputMessage());
-    }
-
     public void writeStorageStatus(Storage storage) {
+        System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
+        System.out.println(OutputMessage.WELCOME_MESSAGE.getOutputMessage());
         System.out.println(OutputMessage.SHOW_CURRENT_ITEMS.getOutputMessage());
         System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
         writeInitPromotionProducts(storage);

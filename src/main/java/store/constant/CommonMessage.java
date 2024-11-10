@@ -3,8 +3,6 @@ package store.constant;
 public enum CommonMessage {
     YES("Y"),
     NO("N");
-
-
     private final String commonMessage;
 
     CommonMessage(final String commonMessage) {
@@ -14,4 +12,5 @@ public enum CommonMessage {
     public String getCommonMessage() {
         return commonMessage;
     }
+
 }

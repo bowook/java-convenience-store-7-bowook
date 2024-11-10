@@ -8,4 +8,5 @@ public class ConvenienceStoreException extends IllegalArgumentException {
     public static ConvenienceStoreException from(final ErrorMessage errorMessage) {
         return new ConvenienceStoreException(errorMessage);
     }
+
 }

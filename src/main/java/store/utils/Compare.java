@@ -14,4 +14,5 @@ public class Compare {
     public static boolean checkSupplementStock(int remainStock) {
         return remainStock < CommonValue.ZERO.getValue();
     }
+
 }

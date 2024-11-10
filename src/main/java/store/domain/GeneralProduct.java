@@ -11,14 +11,6 @@ public class GeneralProduct {
         this.quantity = quantity;
     }
 
-    @Override
-    public String toString() {
-        if (quantity == 0) {
-            return String.format("- %s %,d원 재고 없음", name, Integer.parseInt(price));
-        }
-        return String.format("- %s %,d원 %s개", name, Integer.parseInt(price), quantity);
-    }
-
     public String getName() {
         return name;
     }
@@ -34,4 +26,13 @@ public class GeneralProduct {
     public void subtraction(int value) {
         this.quantity -= Math.abs(value);
     }
+
+    @Override
+    public String toString() {
+        if (quantity == 0) {
+            return String.format("- %s %,d원 재고 없음", name, Integer.parseInt(price));
+        }
+        return String.format("- %s %,d원 %s개", name, Integer.parseInt(price), quantity);
+    }
+
 }

@@ -45,6 +45,10 @@ public class InputView {
         return validateUserAnswer(readLine());
     }
 
+    public void closeConsole() {
+        Console.close();
+    }
+
     private String validateUserAnswer(String userAnswer) {
         if (!userAnswer.equals(CommonMessage.YES.getCommonMessage()) && !userAnswer.equals(
                 CommonMessage.NO.getCommonMessage())) {
@@ -128,8 +132,8 @@ public class InputView {
         return count;
     }
 
-
     private String readLine() {
         return Console.readLine();
     }
+
 }

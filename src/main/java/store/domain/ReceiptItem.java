@@ -32,4 +32,5 @@ public class ReceiptItem {
     public int getPrice() {
         return price;
     }
+
 }

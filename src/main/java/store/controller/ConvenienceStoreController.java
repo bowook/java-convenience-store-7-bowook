@@ -33,13 +33,13 @@ public class ConvenienceStoreController {
     public void operate() {
         String retryFlag;
         do {
-            outputView.writeWelcomeMessage();
             outputView.writeStorageStatus(storage);
             Receipt receipt = new Receipt();
             processPurchase(userPurchaseProduct(), receipt);
             outputView.writeReceipt(receipt, userMembership());
             retryFlag = userRetry();
         } while (retryFlag.equalsIgnoreCase(CommonMessage.YES.getCommonMessage()));
+        inputView.closeConsole();
     }
 
     private void processPurchase(List<String> purchaseProduct, Receipt receipt) {

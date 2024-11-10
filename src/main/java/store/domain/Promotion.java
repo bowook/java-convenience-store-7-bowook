@@ -36,6 +36,5 @@ public class Promotion {
                 (date.isEqual(endDate) || date.isBefore(endDate));
     }
 
-
 }
 

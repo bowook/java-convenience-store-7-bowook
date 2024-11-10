@@ -9,4 +9,5 @@ public class Application {
         ConvenienceStoreController convenienceStoreController = appConfig.convenienceStoreController();
         convenienceStoreController.operate();
     }
+
 }

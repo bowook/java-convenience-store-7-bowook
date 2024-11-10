@@ -3,8 +3,10 @@ package store.domain;
 import java.util.ArrayList;
 import java.util.List;
 import store.constant.CommonMessage;
+import store.constant.CommonValue;
 
 public class Receipt {
+    private final double THIRTY_PERCENT = 0.3;
     private final List<ReceiptItem> receiptItems = new ArrayList<>();
 
     public void addItem(ReceiptItem receiptItem) {
@@ -16,7 +18,7 @@ public class Receipt {
     }
 
     public int totalPurchaseAmount() {
-        int sum = 0;
+        int sum = CommonValue.ZERO.getValue();
         for (ReceiptItem receiptItem : receiptItems) {
             sum += receiptItem.getTotalBuyQuantity() * receiptItem.getPrice();
         }
@@ -24,27 +26,17 @@ public class Receipt {
     }
 
     public int totalPromotionDiscount() {
-        int sum = 0;
+        int sum = CommonValue.ZERO.getValue();
         for (ReceiptItem receiptItem : receiptItems) {
-            if (receiptItem.getGetQuantity() != 0) {
+            if (receiptItem.getGetQuantity() != CommonValue.ZERO.getValue()) {
                 sum += receiptItem.getGetQuantity() * receiptItem.getPrice();
             }
         }
         return sum;
     }
 
-    private int noTotalPromotionAmount() {
-        int sum = 0;
-        for (ReceiptItem receiptItem : receiptItems) {
-            if (receiptItem.getGetQuantity() == 0) {
-                sum += receiptItem.getBuyQuantity() * receiptItem.getPrice();
-            }
-        }
-        return sum;
-    }
-
     public int getTotalPurchaseCount() {
-        int sum = 0;
+        int sum = CommonValue.ZERO.getValue();
         for (ReceiptItem receiptItem : receiptItems) {
             sum += receiptItem.getTotalBuyQuantity();
         }
@@ -55,16 +47,25 @@ public class Receipt {
         if (userAnswer.equals(CommonMessage.YES.getCommonMessage())) {
             return getMembershipDiscount();
         }
-        return 0;
+        return CommonValue.ZERO.getValue();
+    }
+
+    private int noTotalPromotionAmount() {
+        int sum = CommonValue.ZERO.getValue();
+        for (ReceiptItem receiptItem : receiptItems) {
+            if (receiptItem.getGetQuantity() == CommonValue.ZERO.getValue()) {
+                sum += receiptItem.getBuyQuantity() * receiptItem.getPrice();
+            }
+        }
+        return sum;
     }
 
     private int getMembershipDiscount() {
-        int membershipDiscount = (int) (noTotalPromotionAmount() * 0.3);
-        if (membershipDiscount > 8000) {
-            membershipDiscount = 8000;
+        int membershipDiscount = (int) (noTotalPromotionAmount() * THIRTY_PERCENT);
+        if (membershipDiscount > CommonValue.EIGHT_THOUSAND.getValue()) {
+            membershipDiscount = CommonValue.EIGHT_THOUSAND.getValue();
         }
         return membershipDiscount;
     }
-
 
 }

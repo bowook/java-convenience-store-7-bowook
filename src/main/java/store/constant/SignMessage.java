@@ -15,4 +15,5 @@ public enum SignMessage {
     public String getSign() {
         return sign;
     }
+
 }
