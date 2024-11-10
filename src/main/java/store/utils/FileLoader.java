@@ -29,7 +29,7 @@ public class FileLoader {
     private static BufferedReader loadFile(String fileName) {
         InputStream inputStream = FileLoader.class.getClassLoader().getResourceAsStream(fileName);
         if (inputStream == null) {
-            throw new IllegalArgumentException("[ERROR] 파일이 존재하지 않습니다");
+            throw new IllegalArgumentException("[ERROR] 파일이 존재하지 않습니다.");
         }
         return new BufferedReader(new InputStreamReader(inputStream));
     }
