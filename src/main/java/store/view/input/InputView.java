@@ -3,44 +3,51 @@ package store.view.input;
 import camp.nextstep.edu.missionutils.Console;
 import java.util.ArrayList;
 import java.util.List;
+import store.constant.CommonMessage;
+import store.constant.CommonValue;
+import store.constant.SignMessage;
 import store.exception.ConvenienceStoreException;
 import store.exception.ErrorMessage;
+import store.view.output.OutputMessage;
 
 public class InputView {
 
     public List<String> readItems() {
         System.out.println(InputMessage.READ_ITEMS_MESSAGE.getInputMessage());
-        List<String> splitByCommaPurchaseItem = List.of(readLine().split(","));
+        List<String> splitByCommaPurchaseItem = List.of(readLine().split(SignMessage.COMMA.getSign()));
         return validatePurchaseItemProcess(splitByCommaPurchaseItem);
     }
 
     public String readNoDiscountAnswer(String itemName, int itemQuantity) {
-        System.out.println();
-        System.out.printf((InputMessage.NO_PROMOTION_DISCOUNT_MESSAGE.getInputMessage()) + "\n", itemName,
+        System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
+        System.out.printf((InputMessage.NO_PROMOTION_DISCOUNT_MESSAGE.getInputMessage()), itemName,
                 itemQuantity);
+        System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
         return validateUserAnswer(readLine());
     }
 
     public String readOneMoreFree(String itemName) {
-        System.out.println();
-        System.out.printf((InputMessage.ONE_MORE_FREE_MESSAGE.getInputMessage()) + "\n", itemName);
+        System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
+        System.out.printf((InputMessage.ONE_MORE_FREE_MESSAGE.getInputMessage()), itemName);
+        System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
         return validateUserAnswer(readLine());
     }
 
     public String readMembership() {
-        System.out.println();
+        System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
         System.out.println(InputMessage.MEMBERSHIP_MESSAGE.getInputMessage());
         return validateUserAnswer(readLine());
     }
 
     public String readRetry() {
-        System.out.println();
+        System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
         System.out.println(InputMessage.RETRY_MESSAGE.getInputMessage());
         return validateUserAnswer(readLine());
     }
 
     private String validateUserAnswer(String userAnswer) {
-        if (!userAnswer.equals("Y") && !userAnswer.equals("N")) {
+        if (!userAnswer.equals(CommonMessage.YES.getCommonMessage()) && !userAnswer.equals(
+                CommonMessage.NO.getCommonMessage())) {
             throw ConvenienceStoreException.from(ErrorMessage.WRONG_ANSWER);
         }
         return userAnswer;
@@ -56,12 +63,12 @@ public class InputView {
 
     private void validateHyphen(List<String> deleteBracketItem) {
         for (String item : deleteBracketItem) {
-            List<String> splitByHyphenPurchaseItem = List.of(item.split("-"));
-            if (splitByHyphenPurchaseItem.size() != 2) {
+            List<String> splitByHyphenPurchaseItem = List.of(item.split(SignMessage.HYPHEN.getSign()));
+            if (splitByHyphenPurchaseItem.size() != CommonValue.TWO.getValue()) {
                 throw ConvenienceStoreException.from(ErrorMessage.INCORRECT_FORMAT);
             }
-            validateItemName(splitByHyphenPurchaseItem.get(0));
-            validateItemQuantity(splitByHyphenPurchaseItem.get(1));
+            validateItemName(splitByHyphenPurchaseItem.get(CommonValue.ZERO.getValue()));
+            validateItemQuantity(splitByHyphenPurchaseItem.get(CommonValue.ONE.getValue()));
         }
     }
 
@@ -84,37 +91,38 @@ public class InputView {
 
 
     private List<String> validateBracketsFormat(List<String> splitByCommaPurchaseItem) {
-        List<String> deleteBracketItem = new ArrayList<>();
+        List<String> delBracketItem = new ArrayList<>();
         for (String item : splitByCommaPurchaseItem) {
             if (!bracketsFormat(item)) {
                 throw ConvenienceStoreException.from(ErrorMessage.INCORRECT_FORMAT);
             }
-            deleteBracketItem.add(item.substring(1, item.length() - 1));
+            delBracketItem.add(item.substring(CommonValue.ONE.getValue(), item.length() - CommonValue.ONE.getValue()));
         }
-        return deleteBracketItem;
+        return delBracketItem;
     }
 
     private boolean bracketsFormat(String item) {
-        return item.charAt(0) == '[' && item.charAt(item.length() - 1) == ']';
+        return item.charAt(CommonValue.ZERO.getValue()) == SignMessage.LEFT_SQUARE_BRACKET.getSign()
+                .charAt(CommonValue.ZERO.getValue())
+                && item.charAt(item.length() - CommonValue.ONE.getValue()) == SignMessage.RIGHT_SQUARE_BRACKET.getSign()
+                .charAt(CommonValue.ZERO.getValue());
     }
 
     private void validateBracketsCount(List<String> splitByCommaPurchaseItem) {
         for (String item : splitByCommaPurchaseItem) {
             int count = bracketsCount(item);
-            if (count > 2) {
-                throw ConvenienceStoreException.from(ErrorMessage.INCORRECT_FORMAT);
-            }
-            if (count < 2) {
+            if (count != CommonValue.TWO.getValue()) {
                 throw ConvenienceStoreException.from(ErrorMessage.INCORRECT_FORMAT);
             }
         }
     }
 
     private int bracketsCount(String item) {
-        int count = 0;
+        int count = CommonValue.ZERO.getValue();
         for (char spell : item.toCharArray()) {
-            if (spell == '[' || spell == ']') {
-                count += 1;
+            if (spell == SignMessage.LEFT_SQUARE_BRACKET.getSign().charAt(CommonValue.ZERO.getValue())
+                    || spell == SignMessage.RIGHT_SQUARE_BRACKET.getSign().charAt(CommonValue.ZERO.getValue())) {
+                count += CommonValue.ONE.getValue();
             }
         }
         return count;
