@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import store.constant.FileMessage;
 
 public class FileLoader {
 
@@ -22,7 +23,7 @@ public class FileLoader {
     }
 
     private static boolean checkLine(String line) {
-        return !line.startsWith("name");
+        return !line.startsWith(FileMessage.FILE_START_WORD.getFileMessage());
     }
 
     private static BufferedReader loadFile(String fileName) {
