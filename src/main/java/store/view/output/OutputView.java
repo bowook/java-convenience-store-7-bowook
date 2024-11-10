@@ -22,27 +22,71 @@ public class OutputView {
     }
 
     public void writeReceipt(Receipt receipt, String userAnswer) {
-        System.out.println();
-        System.out.println("==============W 편의점================");
-        System.out.println("상품명\t\t수량\t금액");
-        for (ReceiptItem receiptItem : receipt.getReceiptItems()) {
-            System.out.printf("%s\t\t%d\t%d\n", receiptItem.getItemName(), receiptItem.getTotalBuyQuantity(),
-                    receiptItem.getPrice() * receiptItem.getTotalBuyQuantity());
-        }
-        System.out.println("=============증\t정===============");
-        for (ReceiptItem receiptItem : receipt.getReceiptItems()) {
-            if (receiptItem.getGetQuantity() != 0) {
-                System.out.printf("%s\t\t%d\n", receiptItem.getItemName(), receiptItem.getGetQuantity());
-            }
-        }
-        System.out.println("====================================");
-        System.out.printf("총구매액\t\t%d\t%d\n", receipt.getTotalPurchaseCount(), receipt.totalPurchaseAmount());
-        System.out.printf("행사할인\t\t\t-%,d원\n", receipt.totalPromotionDiscount());
-        System.out.printf("멤버십할인\t\t\t-%,d원\n", receipt.validateMembership(userAnswer));
-        System.out.printf("내실돈\t\t\t %,d원\n",
+        writeReceiptMenuHeader();
+        writeReceiptMenuName(receipt);
+        writePresentation(receipt);
+        System.out.println(OutputMessage.PERFORATION_LINE.getOutputMessage());
+        writeUserTotalReceipt(receipt, userAnswer);
+    }
+
+    private void writeUserTotalReceipt(Receipt receipt, String userAnswer) {
+        writeShowTotalPurchaseAmount(receipt);
+        writeShowTotalPromotionDiscountAmount(receipt);
+        writeShowTotalMembershipDiscountAmount(receipt, userAnswer);
+        writeShowTotalPaymentAmount(receipt, userAnswer);
+    }
+
+    private void writeShowTotalPaymentAmount(Receipt receipt, String userAnswer) {
+        System.out.printf(OutputMessage.SHOW_TOTAL_PAYMENT_AMOUNT.getOutputMessage(),
                 receipt.totalPurchaseAmount() - receipt.totalPromotionDiscount() - receipt.validateMembership(
                         userAnswer));
+        System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
     }
+
+    private void writeShowTotalMembershipDiscountAmount(Receipt receipt, String userAnswer) {
+        System.out.printf(OutputMessage.SHOW_TOTAL_MEMBERSHIP_DISCOUNT_AMOUNT.getOutputMessage(),
+                receipt.validateMembership(userAnswer));
+        System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
+    }
+
+    private void writeShowTotalPromotionDiscountAmount(Receipt receipt) {
+        System.out.printf(OutputMessage.SHOW_TOTAL_PROMOTION_DISCOUNT_AMOUNT.getOutputMessage(),
+                receipt.totalPromotionDiscount());
+        System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
+    }
+
+    private void writeShowTotalPurchaseAmount(Receipt receipt) {
+        System.out.printf(OutputMessage.SHOW_TOTAL_PURCHASE_AMOUNT.getOutputMessage(), receipt.getTotalPurchaseCount(),
+                receipt.totalPurchaseAmount());
+        System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
+    }
+
+    private void writePresentation(Receipt receipt) {
+        System.out.println(OutputMessage.SHOW_RECEIPT_PRESENTATION_HEADER.getOutputMessage());
+        for (ReceiptItem receiptItem : receipt.getReceiptItems()) {
+            if (receiptItem.getGetQuantity() != 0) {
+                System.out.printf(OutputMessage.SHOW_RECEIPT_PRESENTATION_AMOUNT.getOutputMessage(),
+                        receiptItem.getItemName(), receiptItem.getGetQuantity());
+                System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
+            }
+        }
+    }
+
+    private void writeReceiptMenuName(Receipt receipt) {
+        System.out.println(OutputMessage.SHOW_RECEIPT_MENU_NAME.getOutputMessage());
+        for (ReceiptItem receiptItem : receipt.getReceiptItems()) {
+            System.out.printf((OutputMessage.SHOW_RECEIPT_USER_PAYMENT_PRODUCT.getOutputMessage()),
+                    receiptItem.getItemName(), receiptItem.getTotalBuyQuantity(),
+                    receiptItem.getPrice() * receiptItem.getTotalBuyQuantity());
+            System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
+        }
+    }
+
+    private void writeReceiptMenuHeader() {
+        System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
+        System.out.println(OutputMessage.SHOW_RECEIPT_HEADER.getOutputMessage());
+    }
+
 
     private void writeInitPromotionProducts(Storage storage) {
         for (PromotionProduct promotionProduct : storage.getPromotionProducts()) {
@@ -54,7 +98,7 @@ public class OutputView {
     private void findEqualGeneralProductName(List<GeneralProduct> generalProducts, String name) {
         for (GeneralProduct generalProduct : generalProducts) {
             if (generalProduct.getName().equals(name)) {
-                System.out.println(generalProduct.toString());
+                System.out.println(generalProduct);
                 break;
             }
         }
