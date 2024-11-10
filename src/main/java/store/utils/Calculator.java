@@ -19,6 +19,14 @@ public class Calculator {
                 / promotionProduct.getPromotionSum());
     }
 
+    public static int minus(int numberOne, int numberTwo) {
+        return numberOne - numberTwo;
+    }
+
+    public static int divide(int numberOne, int numberTwo) {
+        return numberOne / numberTwo;
+    }
+
     public static List<Integer> calculateGetAndBuy(int count, int leftBuy, PromotionProduct product) {
         int get = (count - leftBuy) / product.getPromotionSum();
         int buy = (count - leftBuy) - get;
