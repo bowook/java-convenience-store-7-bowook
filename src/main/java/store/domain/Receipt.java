@@ -2,6 +2,7 @@ package store.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import store.constant.CommonMessage;
 
 public class Receipt {
     private final List<ReceiptItem> receiptItems = new ArrayList<>();
@@ -51,7 +52,7 @@ public class Receipt {
     }
 
     public int validateMembership(String userAnswer) {
-        if (userAnswer.equals("Y")) {
+        if (userAnswer.equals(CommonMessage.YES.getCommonMessage())) {
             return getMembershipDiscount();
         }
         return 0;
