@@ -10,7 +10,7 @@ public class Promotion {
     private final LocalDate startDate;
     private final LocalDate endDate;
 
-    public Promotion(String name, int buy, int get, String startDate, String endDate) {
+    public Promotion(final String name, final int buy, final int get, final String startDate, final String endDate) {
         this.name = name;
         this.buy = buy;
         this.get = get;
@@ -31,7 +31,7 @@ public class Promotion {
     }
 
     public boolean isActive(LocalDateTime dateTime) {
-        LocalDate date = dateTime.toLocalDate(); // LocalDate로 변환하여 비교
+        LocalDate date = dateTime.toLocalDate();
         return (date.isEqual(startDate) || date.isAfter(startDate)) &&
                 (date.isEqual(endDate) || date.isBefore(endDate));
     }
