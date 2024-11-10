@@ -56,6 +56,36 @@ public class InputViewTest {
     }
 
     @Test
+    @DisplayName("이름과 수량이 (-)로 연결되어 있는데 이름이 비어있을 경우 검증")
+    void 이름_비어있는_아이템_검증() {
+        //given
+        String input = "[-2]";
+        System.setIn(new ByteArrayInputStream(input.getBytes()));
+
+        //when
+        try {
+            inputView.readItems();
+        } catch (ConvenienceStoreException e) {
+            assertThat(e.getMessage()).isEqualTo(ErrorMessage.INCORRECT_FORMAT.getErrorMessage());
+        }
+    }
+
+    @Test
+    @DisplayName("이름과 수량이 (-)로 연결되어 있는데 이름이 공백인 경우 검증")
+    void 이름_공백_문자_아이템_검증() {
+        //given
+        String input = "[ -2]";
+        System.setIn(new ByteArrayInputStream(input.getBytes()));
+
+        //when
+        try {
+            inputView.readItems();
+        } catch (ConvenienceStoreException e) {
+            assertThat(e.getMessage()).isEqualTo(ErrorMessage.INCORRECT_FORMAT.getErrorMessage());
+        }
+    }
+
+    @Test
     @DisplayName("각 아이템이 쉼표(,)로 연결되어있는지 검증")
     void 아이템_사이_쉼표_기호_검증() {
         //given
@@ -70,6 +100,20 @@ public class InputViewTest {
         }
     }
 
+    @Test
+    @DisplayName("대괄호 입력 검증")
+    void 대괄호_입력_검증() {
+        //given
+        String input = "[사이다]-2";
+        System.setIn(new ByteArrayInputStream(input.getBytes()));
+
+        //when & then
+        try {
+            inputView.readItems();
+        } catch (ConvenienceStoreException e) {
+            assertThat(e.getMessage()).isEqualTo(ErrorMessage.INCORRECT_FORMAT.getErrorMessage());
+        }
+    }
 
     @Test
     @DisplayName("아이템 입력 포멧 검증")
