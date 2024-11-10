@@ -1,5 +1,6 @@
 package store.config;
 
+import store.constant.FileMessage;
 import store.controller.ConvenienceStoreController;
 import store.service.StorageService;
 import store.view.input.InputView;
@@ -19,7 +20,10 @@ public class AppConfig {
     }
 
     private StorageService storageService() {
-        return new StorageService();
+        return new StorageService(
+                FileMessage.PRODUCTS_FILE_NAME.getFileMessage(),
+                FileMessage.PROMOTION_FILE_NAME.getFileMessage()
+        );
     }
 
 }

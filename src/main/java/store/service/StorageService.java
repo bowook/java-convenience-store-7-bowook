@@ -13,13 +13,18 @@ import store.utils.FileLoader;
 
 public class StorageService {
     private static final String FILE_NOT_FOUND_ERROR = "[ERROR] 파일을 찾을 수 없습니다.";
+    private final List<String> productFile;
+    private final List<String> promotionFile;
+
+    public StorageService(final String productFileName, final String promotionFileName) {
+        this.productFile = loadFile(productFileName);
+        this.promotionFile = loadFile(promotionFileName);
+    }
 
     public Storage initializeStorage() {
-        List<String> getProductFile = loadFile(FileMessage.PRODUCTS_FILE_NAME.getFileMessage());
-        List<String> getPromotionFile = loadFile(FileMessage.PROMOTION_FILE_NAME.getFileMessage());
-        List<Promotion> promotions = generatePromotionData(getPromotionFile);
-        List<GeneralProduct> onlyGeneralProducts = findGeneralProduct(getProductFile);
-        List<PromotionProduct> onlyPromotionProducts = findPromotionProduct(getProductFile, promotions);
+        List<Promotion> promotions = generatePromotionData(promotionFile);
+        List<GeneralProduct> onlyGeneralProducts = findGeneralProduct(productFile);
+        List<PromotionProduct> onlyPromotionProducts = findPromotionProduct(productFile, promotions);
         List<GeneralProduct> insertedGeneralProducts = insertOutOfStock(onlyPromotionProducts, onlyGeneralProducts);
         return new Storage(insertedGeneralProducts, onlyPromotionProducts);
     }
