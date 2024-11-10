@@ -40,10 +40,11 @@ public class Storage {
                 .orElse(null);
     }
 
-    private void validateQuantity(String name, String quantity) {
-        if (getProductQuantity(name) < Integer.parseInt(quantity)) {
-            throw ConvenienceStoreException.from(ErrorMessage.STORAGE_OVER);
-        }
+    public PromotionProduct findPromotionProduct(String productName) {
+        return promotionProducts.stream()
+                .filter(product -> product.getName().equals(productName))
+                .findFirst()
+                .orElse(null);
     }
 
     public void subtractPromotionProduct(PromotionProduct promotionProduct, int itemQuantity) {
@@ -52,6 +53,12 @@ public class Storage {
 
     public void subtractGeneralProduct(GeneralProduct generalProduct, int itemQuantity) {
         generalProduct.subtraction(itemQuantity);
+    }
+
+    private void validateQuantity(String name, String quantity) {
+        if (getProductQuantity(name) < Integer.parseInt(quantity)) {
+            throw ConvenienceStoreException.from(ErrorMessage.STORAGE_OVER);
+        }
     }
 
     private int getProductQuantity(String name) {
@@ -67,13 +74,6 @@ public class Storage {
         if (!isProductInStorage(name)) {
             throw ConvenienceStoreException.from(ErrorMessage.NON_EXISTENT_PRODUCT);
         }
-    }
-
-    public PromotionProduct findPromotionProduct(String productName) {
-        return promotionProducts.stream()
-                .filter(product -> product.getName().equals(productName))
-                .findFirst()
-                .orElse(null);
     }
 
     private boolean isProductInStorage(String productName) {
