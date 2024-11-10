@@ -12,9 +12,11 @@ import store.domain.Storage;
 import store.utils.FileLoader;
 
 public class StorageService {
+    private static final String FILE_NOT_FOUND_ERROR = "[ERROR] 파일을 찾을 수 없습니다.";
+
     public Storage initializeStorage() {
-        List<String> getProductFile = loadProducts();
-        List<String> getPromotionFile = loadPromotions();
+        List<String> getProductFile = loadFile(FileMessage.PRODUCTS_FILE_NAME.getFileMessage());
+        List<String> getPromotionFile = loadFile(FileMessage.PROMOTION_FILE_NAME.getFileMessage());
         List<Promotion> promotions = generatePromotionData(getPromotionFile);
         List<GeneralProduct> onlyGeneralProducts = findGeneralProduct(getProductFile);
         List<PromotionProduct> onlyPromotionProducts = findPromotionProduct(getProductFile, promotions);
@@ -22,11 +24,11 @@ public class StorageService {
         return new Storage(insertedGeneralProducts, onlyPromotionProducts);
     }
 
-    private List<String> loadPromotions() {
+    private List<String> loadFile(String fileName) {
         try {
-            return FileLoader.fileReadLine(FileMessage.PROMOTION_FILE_NAME.getFileMessage());
+            return FileLoader.fileReadLine(fileName);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(FILE_NOT_FOUND_ERROR);
         }
     }
 
@@ -38,14 +40,6 @@ public class StorageService {
                     items.get(3), items.get(4)));
         }
         return promotions;
-    }
-
-    private List<String> loadProducts() {
-        try {
-            return FileLoader.fileReadLine(FileMessage.PRODUCTS_FILE_NAME.getFileMessage());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private List<GeneralProduct> insertOutOfStock(List<PromotionProduct> prItem, List<GeneralProduct> generalProducts) {
