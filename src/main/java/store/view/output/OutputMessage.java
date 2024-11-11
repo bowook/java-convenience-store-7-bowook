@@ -10,7 +10,7 @@ public enum OutputMessage {
     SHOW_PRESENTATION_FORMAT("%-14s%-10s"),
     PERFORATION_LINE("======================================="),
     SHOW_DISCOUNT_FORMAT("%-14s%15s"),
-    SHOW_PAYMENT_FORMAT("%-14s%15s"),
+    SHOW_PAYMENT_FORMAT("%-14s%22s"),
     NEW_LINE(System.lineSeparator());
 
     private final String outputMessage;

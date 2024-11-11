@@ -35,12 +35,13 @@ public class OutputView {
     }
 
     private void writeShowTotalPaymentAmount(Receipt receipt, String userAnswer) {
-        String name = String.format("%-14s", "내실돈").replace(" ", "\u3000");
-        String price = String.format("%,d", receipt.totalPurchaseAmount() - receipt.totalPromotionDiscount() -
-                receipt.validateMembership(userAnswer));
-        System.out.printf(OutputMessage.SHOW_PAYMENT_FORMAT.getOutputMessage(), name, price);
+        String nameAndPrice = String.format(OutputMessage.SHOW_PAYMENT_FORMAT.getOutputMessage(), "내실돈",
+                String.format("%,d", receipt.totalPurchaseAmount() - receipt.totalPromotionDiscount() -
+                        receipt.validateMembership(userAnswer)));
+        System.out.println(nameAndPrice);
         System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
     }
+
 
     private void writeShowTotalMembershipDiscountAmount(Receipt receipt, String userAnswer) {
         String name = String.format("%-14s", "멤버십할인").replace(" ", "\u3000");
