@@ -2,7 +2,9 @@ package store.view.input;
 
 import camp.nextstep.edu.missionutils.Console;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import store.constant.CommonMessage;
 import store.constant.CommonValue;
 import store.constant.SignMessage;
@@ -61,8 +63,18 @@ public class InputView {
     private List<String> validatePurchaseItemProcess(List<String> splitByCommaPurchaseItem) {
         validateBracketsCount(splitByCommaPurchaseItem);
         List<String> deleteBracketItem = validateBracketsFormat(splitByCommaPurchaseItem);
+        validateDuplicateItemName(deleteBracketItem);
         validateHyphen(deleteBracketItem);
         return deleteBracketItem;
+    }
+
+    private void validateDuplicateItemName(List<String> deleteBracketItem) {
+        Set<String> uniqueItems = new HashSet<>();
+        for (String item : deleteBracketItem) {
+            if (!uniqueItems.add(item)) {
+                throw ConvenienceStoreException.from(ErrorMessage.INCORRECT_FORMAT);
+            }
+        }
     }
 
     private void validateHyphen(List<String> deleteBracketItem) {
