@@ -35,27 +35,32 @@ public class OutputView {
     }
 
     private void writeShowTotalPaymentAmount(Receipt receipt, String userAnswer) {
-        System.out.printf(OutputMessage.SHOW_TOTAL_PAYMENT_AMOUNT.getOutputMessage(),
-                receipt.totalPurchaseAmount() - receipt.totalPromotionDiscount() - receipt.validateMembership(
-                        userAnswer));
+        String name = String.format("%-14s", "내실돈").replace(" ", "\u3000");
+        String price = String.format("%,d", receipt.totalPurchaseAmount() - receipt.totalPromotionDiscount() -
+                receipt.validateMembership(userAnswer));
+        System.out.printf(OutputMessage.SHOW_PAYMENT_FORMAT.getOutputMessage(), name, price);
         System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
     }
 
     private void writeShowTotalMembershipDiscountAmount(Receipt receipt, String userAnswer) {
-        System.out.printf(OutputMessage.SHOW_TOTAL_MEMBERSHIP_DISCOUNT_AMOUNT.getOutputMessage(),
-                receipt.validateMembership(userAnswer));
+        String name = String.format("%-14s", "멤버십할인").replace(" ", "\u3000");
+        String price = String.format("-%,d", receipt.validateMembership(userAnswer));
+        System.out.printf(OutputMessage.SHOW_DISCOUNT_FORMAT.getOutputMessage(), name, price);
         System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
     }
 
     private void writeShowTotalPromotionDiscountAmount(Receipt receipt) {
-        System.out.printf(OutputMessage.SHOW_TOTAL_PROMOTION_DISCOUNT_AMOUNT.getOutputMessage(),
-                receipt.totalPromotionDiscount());
+        String name = String.format("%-14s", "행사할인").replace(" ", "\u3000");
+        String price = String.format("-%,d", receipt.totalPromotionDiscount());
+        System.out.printf(OutputMessage.SHOW_DISCOUNT_FORMAT.getOutputMessage(), name, price);
         System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
     }
 
     private void writeShowTotalPurchaseAmount(Receipt receipt) {
-        System.out.printf(OutputMessage.SHOW_TOTAL_PURCHASE_AMOUNT.getOutputMessage(), receipt.getTotalPurchaseCount(),
-                receipt.totalPurchaseAmount());
+        String name = String.format("%-14s", "총구매액").replace(" ", "\u3000");
+        String quantity = String.format("%-10d", receipt.getTotalPurchaseCount());
+        String price = String.format("%,-10d", receipt.totalPurchaseAmount());
+        System.out.printf(OutputMessage.SHOW_RECEIPT_INIT_FORMAT.getOutputMessage(), name, quantity, price);
         System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
     }
 
@@ -63,8 +68,9 @@ public class OutputView {
         System.out.println(OutputMessage.SHOW_RECEIPT_PRESENTATION_HEADER.getOutputMessage());
         for (ReceiptItem receiptItem : receipt.getReceiptItems()) {
             if (receiptItem.getGetQuantity() != 0) {
-                System.out.printf(OutputMessage.SHOW_RECEIPT_PRESENTATION_AMOUNT.getOutputMessage(),
-                        receiptItem.getItemName(), receiptItem.getGetQuantity());
+                String name = String.format("%-14s", receiptItem.getItemName()).replace(" ", "\u3000");
+                String quantity = String.format("%,-10d", receiptItem.getGetQuantity());
+                System.out.printf(OutputMessage.SHOW_PRESENTATION_FORMAT.getOutputMessage(), name, quantity);
                 System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
             }
         }
@@ -73,9 +79,10 @@ public class OutputView {
     private void writeReceiptMenuName(Receipt receipt) {
         System.out.println(OutputMessage.SHOW_RECEIPT_MENU_NAME.getOutputMessage());
         for (ReceiptItem receiptItem : receipt.getReceiptItems()) {
-            System.out.printf((OutputMessage.SHOW_RECEIPT_USER_PAYMENT_PRODUCT.getOutputMessage()),
-                    receiptItem.getItemName(), receiptItem.getTotalBuyQuantity(),
-                    receiptItem.getPrice() * receiptItem.getTotalBuyQuantity());
+            String name = String.format("%-14s", receiptItem.getItemName()).replace(" ", "\u3000");
+            String quantity = String.format("%-10d", receiptItem.getTotalBuyQuantity());
+            String price = String.format("%,-10d", receiptItem.getPrice() * receiptItem.getTotalBuyQuantity());
+            System.out.printf(OutputMessage.SHOW_RECEIPT_INIT_FORMAT.getOutputMessage(), name, quantity, price);
             System.out.print(OutputMessage.NEW_LINE.getOutputMessage());
         }
     }
